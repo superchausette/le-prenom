@@ -1,37 +1,42 @@
 <!DOCTYPE html>
 <html>
-
-<head>
+  <head>
     <title>Le Prenom</title>
-    <script src="https://unpkg.com/htmx.org@1.9.2"
-        integrity="sha384-L6OqL9pRWyyFU3+/bjdSri+iIphTN/bvYyM37tICVyOJkWZLpP2vGn6VUEXgzg6h"
-        crossorigin="anonymous"></script>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-</head>
+    <script
+      src="https://unpkg.com/htmx.org@1.9.2"
+      integrity="sha384-L6OqL9pRWyyFU3+/bjdSri+iIphTN/bvYyM37tICVyOJkWZLpP2vGn6VUEXgzg6h"
+      crossorigin="anonymous"
+    ></script>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
+    />
+  </head>
 
-<body>
+  <body>
     <h1>Welcome to le prenom !</h1>
 
     <h2>Lists</h2>
     <ul>
-        <li><a href="list">List of all first name</a></li>
-        <li><a href="list/boy">List of all girl first name</a></li>
-        <li><a href="list/girl">List of all boy first name</a></li>
+      <li><a href="list">List of all first name</a></li>
+      <li><a href="list/boy">List of all girl first name</a></li>
+      <li><a href="list/girl">List of all boy first name</a></li>
     </ul>
-
 
     <h2>Sessions</h2>
     <form hx-post="/sessions/new" hx-target="#new_session_result">
-        <textarea name="session_name" placeholder="Session Name" required></textarea>
-        <button type="submit">Create</button>
+      <textarea
+        name="session_name"
+        placeholder="Session Name"
+        required
+      ></textarea>
+      <button type="submit">Create</button>
     </form>
     <div id="new_session_result"></div>
     <h3>Available sessions</h3>
     <ul hx-get="/sessions/list" hx-trigger="load">
-        <li>Placeholder</li>
+      <li>Placeholder</li>
     </ul>
-
-</body>
-
+  </body>
 </html>

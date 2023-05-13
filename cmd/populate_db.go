@@ -25,7 +25,7 @@ func main() {
 	}
 	if *dbName == "" {
 		flag.Usage()
-		fmt.Println("Missing database nameargument")
+		fmt.Println("Missing database name argument")
 		return
 	}
 

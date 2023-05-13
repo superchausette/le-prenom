@@ -61,6 +61,7 @@ func main() {
 	db.AutoMigrate(&leprenom.FirstName{})
 	db.AutoMigrate(&leprenom.Session{})
 	db.AutoMigrate(&leprenom.SessionContent{})
+	db.AutoMigrate(&leprenom.SessionNameStatus{})
 
 	createSession := func(name string) string {
 		fmt.Println("Creating session: ", name)
@@ -95,12 +96,8 @@ func main() {
 	}
 	listSessionHandler := func(w http.ResponseWriter, r *http.Request) {
 		var sessions []leprenom.Session
-		if err := db.Select("name").Find(&sessions).Error; err != nil {
+		if err := db.Select("id", "name").Find(&sessions).Error; err != nil {
 			log.Fatal(err)
-		}
-
-		for _, session := range sessions {
-			fmt.Println(session.Name)
 		}
 		sessionListPartialTmpl.Execute(w, sessions)
 	}

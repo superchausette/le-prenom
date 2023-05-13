@@ -16,6 +16,12 @@ func CountBoyFirstName(db *gorm.DB) (int64, error) {
 
 func CountGirlFirstName(db *gorm.DB) (int64, error) {
 	var count int64
-	result := db.Model(&FirstName{}).Where("Gender = ?", "1").Count(&count)
+	result := db.Model(&FirstName{}).Where("Gender = ?", "2").Count(&count)
+	return count, result.Error
+}
+
+func CountUnisexName(db *gorm.DB) (int64, error) {
+	var count int64
+	result := db.Model(&FirstName{}).Select("name").Group("name").Having("COUNT(DISTINCT gender) > ?", 1).Count(&count)
 	return count, result.Error
 }

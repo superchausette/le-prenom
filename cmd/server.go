@@ -13,31 +13,6 @@ import (
 	"gorm.io/gorm"
 )
 
-func DataStatDisplay(db *gorm.DB) {
-	// Print the number of entry in the db
-	{
-		cnt, err := leprenom.CountFirstName(db)
-		if err != nil {
-			panic(err)
-		}
-		fmt.Println(cnt, "first name in database")
-	}
-	{
-		cnt, err := leprenom.CountBoyFirstName(db)
-		if err != nil {
-			panic(err)
-		}
-		fmt.Println(cnt, "boy first name in database")
-	}
-	{
-		cnt, err := leprenom.CountGirlFirstName(db)
-		if err != nil {
-			panic(err)
-		}
-		fmt.Println(cnt, "girl first name in database")
-	}
-}
-
 func main() {
 	dbName := flag.String("dbname", "", "Database to create or update")
 	flag.Usage = func() {
@@ -47,7 +22,7 @@ func main() {
 	flag.Parse()
 	if *dbName == "" {
 		flag.Usage()
-		fmt.Println("Missing database nameargument")
+		fmt.Println("Missing database name argument")
 		return
 	}
 
@@ -77,6 +52,7 @@ func main() {
 	indexTmpl := template.Must(template.ParseFiles("template/index.html"))
 	notFoundTmpl := template.Must(template.ParseFiles("template/404.html"))
 	sessionListPartialTmpl := template.Must(template.ParseFiles("template/partial/session_list.html"))
+	statsPartialTmpl := template.Must(template.ParseFiles("template/partial/stats.html"))
 
 	rootHandler := func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
@@ -101,9 +77,14 @@ func main() {
 		}
 		sessionListPartialTmpl.Execute(w, sessions)
 	}
+
+	statsHandler := func(w http.ResponseWriter, r *http.Request) {
+		statsPartialTmpl.Execute(w, leprenom.NewFirstNameStats(db))
+	}
 	http.HandleFunc("/", rootHandler)
 	http.HandleFunc("/sessions/new", newSessionHandler)
 	http.HandleFunc("/sessions/list", listSessionHandler)
+	http.HandleFunc("/stats", statsHandler)
 
 	// Start the web server
 	fmt.Println("Server is listening on http://localhost:9999/")

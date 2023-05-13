@@ -27,9 +27,12 @@ func fromRecord(record []string) (CsvContent, error) {
 	if err != nil {
 		return CsvContent{}, err
 	}
-	year, err := strconv.Atoi(record[2])
-	if err != nil {
-		return CsvContent{}, err
+	year := 0
+	if record[2] != "XXXX" {
+		year, err = strconv.Atoi(record[2])
+		if err != nil {
+			return CsvContent{}, err
+		}
 	}
 	count, err := strconv.Atoi(record[3])
 	if err != nil {
@@ -47,9 +50,11 @@ func Import(r io.Reader) ([]CsvContent, error) {
 	}
 	content := make([]CsvContent, 0, len(records))
 	for _, record := range records {
-		fmt.Println(record)
+		// Skip header
+		if record[0] == "sexe" {
+			continue
+		}
 		csvContent, err := fromRecord(record)
-		fmt.Println(csvContent, err)
 		if err != nil {
 			return []CsvContent{}, err
 		}
@@ -57,7 +62,6 @@ func Import(r io.Reader) ([]CsvContent, error) {
 			continue
 		}
 		content = append(content, csvContent)
-
 	}
 	return content, nil
 }

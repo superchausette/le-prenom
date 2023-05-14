@@ -12,37 +12,45 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
     />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css"
+      integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu"
+      crossorigin="anonymous"
+    />
   </head>
 
   <body>
-    <h1>Welcome to le prenom !</h1>
-
-    <h1>Stats</h1>
-    <div hx-get="/stats" hx-trigger="load" class="container">
+    <div class="container">
+      <h1>Welcome to le prenom !</h1>
+    </div>
+    <div class="container">
+      <h2>Stats</h2>
+      <div hx-get="/stats" hx-trigger="load" class="container">
         Stat placeholder
+      </div>
     </div>
 
-    <h2>Lists</h2>
-    <ul>
-      <li><a href="list">List of all first name</a></li>
-      <li><a href="list/boy">List of all girl first name</a></li>
-      <li><a href="list/girl">List of all boy first name</a></li>
-    </ul>
-
-    <h2>Sessions</h2>
-    <form hx-post="/sessions/new" hx-target="#new_session_result">
-      <textarea
-        name="session_name"
-        placeholder="Session Name"
-        required
-      ></textarea>
-      <button type="submit">Create</button>
-    </form>
-    <div id="new_session_result"></div>
-    <h3>Available sessions</h3>
-    <ul hx-get="/sessions/list" hx-trigger="load">
-      <li>Placeholder</li>
-    </ul>
+    <div class="container">
+      <h2>List</h2>
+      <a href="list">List of all first name</a>
+    </div>
+    <div class="container">
+      <h2>Sessions</h2>
+      <form hx-post="/sessions/new" hx-target="#new_session_result">
+        <input
+          type="text"
+          name="session_name"
+          placeholder="Session Name"
+          required
+        />
+        <button type="submit">Create</button>
+      </form>
+      <div id="new_session_result"></div>
+      <h3>Available sessions</h3>
+      <ul hx-get="/sessions/list" hx-trigger="load, newSessionCreatedEvent from:body">
+        <li>Placeholder</li>
+      </ul>
+    </div>
   </body>
 </html>

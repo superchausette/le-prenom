@@ -44,15 +44,17 @@ func main() {
 		if result != nil && result.Error != nil {
 			return fmt.Sprintf("Unable to create session '%s'", name)
 		}
-		return fmt.Sprintf("Succesfully created session '%s'", name)
+		return fmt.Sprintf("Successfully created session '%s'", name)
 	}
 
 	//DataStatDisplay(db)
 
 	indexTmpl := template.Must(template.ParseFiles("template/index.html"))
+	statsPartialTmpl := template.Must(template.ParseFiles("template/partial/stats.html"))
+	listTmpl := template.Must(template.ParseFiles("template/list.html"))
 	notFoundTmpl := template.Must(template.ParseFiles("template/404.html"))
 	sessionListPartialTmpl := template.Must(template.ParseFiles("template/partial/session_list.html"))
-	statsPartialTmpl := template.Must(template.ParseFiles("template/partial/stats.html"))
+	firstNameListPartialTmpl := template.Must(template.ParseFiles("template/partial/firstname_list.html"))
 
 	rootHandler := func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
@@ -62,12 +64,27 @@ func main() {
 		}
 		indexTmpl.Execute(w, "")
 	}
+	statsHandler := func(w http.ResponseWriter, r *http.Request) {
+		statsPartialTmpl.Execute(w, leprenom.NewFirstNameStats(db))
+	}
+	listHandler := func(w http.ResponseWriter, r *http.Request) {
+		// Check if this an htmx request
+		htmx := r.Header.Get("HX-Request")
+		if htmx != "" {
+			//gender := r.URL.Query().Get("gender")
+			first_names := leprenom.ListAllFirstName(db)
+			firstNameListPartialTmpl.Execute(w, first_names)
+			return
+		}
+		listTmpl.Execute(w, "")
+	}
 	newSessionHandler := func(w http.ResponseWriter, r *http.Request) {
 		err := r.ParseForm()
 		if err != nil {
 			log.Fatal(err)
 		}
 		result := createSession(r.Form.Get("session_name"))
+		w.Header().Set("HX-Trigger", "newSessionCreatedEvent")
 		fmt.Fprintf(w, result)
 	}
 	listSessionHandler := func(w http.ResponseWriter, r *http.Request) {
@@ -77,14 +94,11 @@ func main() {
 		}
 		sessionListPartialTmpl.Execute(w, sessions)
 	}
-
-	statsHandler := func(w http.ResponseWriter, r *http.Request) {
-		statsPartialTmpl.Execute(w, leprenom.NewFirstNameStats(db))
-	}
 	http.HandleFunc("/", rootHandler)
+	http.HandleFunc("/stats", statsHandler)
+	http.HandleFunc("/list", listHandler)
 	http.HandleFunc("/sessions/new", newSessionHandler)
 	http.HandleFunc("/sessions/list", listSessionHandler)
-	http.HandleFunc("/stats", statsHandler)
 
 	// Start the web server
 	fmt.Println("Server is listening on http://localhost:9999/")

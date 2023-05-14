@@ -20,5 +20,5 @@ type SessionContent struct {
 
 type SessionNameStatus struct {
 	ID     uint   `gorm:"primaryKey;autoIncrement"`
-	Status string `gorm:"type:varchar(16);unique"`
+	Status string `gorm:"type:varchar(32);unique"`
 }

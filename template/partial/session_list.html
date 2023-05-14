@@ -1,3 +1,16 @@
-{{range .}}
-	<li><a href="/session/'{{.ID}}'">{{.Name}}</a></li>
-{{end}}
+<table class="table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{range .}}
+    <tr>
+      <td><a href="/session/{{.ID}}">{{.Name}}</a></td>
+      <td>{{sessionTypeToStr .FirstNameType}}</td>
+    </tr>
+    {{end}}
+  </tbody>
+</table>

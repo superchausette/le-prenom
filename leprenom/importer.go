@@ -7,11 +7,6 @@ import (
 	"strconv"
 )
 
-const (
-	Boy  int = 1
-	Girl     = 2
-)
-
 type CsvContent struct {
 	Gender    int
 	FirstName string

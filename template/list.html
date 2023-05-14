@@ -25,20 +25,15 @@
       <h1>List of all first name</h1>
       <div class="container">
         <button type="button" class="btn btn-primary" hx-get="list" hx-target="#list-body">All</button>
-        <button type="button" class="btn btn-primary" hx-get="list" hx-target="#list-body">Boy</button>
-        <button type="button" class="btn btn-primary" hx-get="list" hx-target="#list-body">Girl</button>
-        <button type="button" class="btn btn-primary" hx-get="list" hx-target="#list-body">Unisex</button>
+        <button type="button" class="btn btn-primary" hx-get="list?type=boy"  hx-target="#list-body">Boy</button>
+        <button type="button" class="btn btn-primary" hx-get="list?type=girl" hx-target="#list-body">Girl</button>
+        <button type="button" class="btn btn-primary" hx-get="list?type=unisex" hx-target="#list-body">Unisex</button>
       </div>
       <div class="container">
-        <table hx-indicator=".htmx-indicator">
-          <thead>
-            <tr>
-              <th>First Name</th>
-            </tr>
-          </thead>
+        <table class="table" hx-indicator=".htmx-indicator">
           <tbody id="list-body">
             <tr>
-              <td>Placeholder</td>
+              <td>Chose a first name type to see the list</td>
             </tr>
           </tbody>
         </table>

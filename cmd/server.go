@@ -38,23 +38,22 @@ func main() {
 	db.AutoMigrate(&leprenom.SessionContent{})
 	db.AutoMigrate(&leprenom.SessionNameStatus{})
 
-	createSession := func(name string) string {
-		fmt.Println("Creating session: ", name)
-		result := db.Create(&leprenom.Session{Name: name})
-		if result != nil && result.Error != nil {
-			return fmt.Sprintf("Unable to create session '%s'", name)
-		}
-		return fmt.Sprintf("Successfully created session '%s'", name)
-	}
-
 	//DataStatDisplay(db)
-
+	tmplFuncMap := template.FuncMap{
+		"mod": func(value, modulo int) int {
+			return value % modulo
+		},
+		"sessionTypeToStr": leprenom.SessionTypeToString}
 	indexTmpl := template.Must(template.ParseFiles("template/index.html"))
 	statsPartialTmpl := template.Must(template.ParseFiles("template/partial/stats.html"))
 	listTmpl := template.Must(template.ParseFiles("template/list.html"))
 	notFoundTmpl := template.Must(template.ParseFiles("template/404.html"))
-	sessionListPartialTmpl := template.Must(template.ParseFiles("template/partial/session_list.html"))
-	firstNameListPartialTmpl := template.Must(template.ParseFiles("template/partial/firstname_list.html"))
+	sessionListPartialTmpl := template.Must(template.New("SessionList").
+		Funcs(tmplFuncMap).
+		ParseFiles("template/partial/session_list.html"))
+	firstNameListPartialTmpl := template.Must(template.New("List").
+		Funcs(tmplFuncMap).
+		ParseFiles("template/partial/firstname_list.html"))
 
 	rootHandler := func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
@@ -71,28 +70,36 @@ func main() {
 		// Check if this an htmx request
 		htmx := r.Header.Get("HX-Request")
 		if htmx != "" {
-			//gender := r.URL.Query().Get("gender")
+			listType := r.URL.Query().Get("type")
 			first_names := leprenom.ListAllFirstName(db)
-			firstNameListPartialTmpl.Execute(w, first_names)
+			err := firstNameListPartialTmpl.ExecuteTemplate(w, "firstname_list.html", first_names)
+			if err != nil {
+				fmt.Println("First Name List Partial Template error: ", err)
+			}
 			return
 		}
-		listTmpl.Execute(w, "")
+		err = listTmpl.Execute(w, "")
 	}
 	newSessionHandler := func(w http.ResponseWriter, r *http.Request) {
 		err := r.ParseForm()
 		if err != nil {
 			log.Fatal(err)
 		}
-		result := createSession(r.Form.Get("session_name"))
+		sessionName := r.Form.Get("session_name")
+		sessionType := r.Form.Get("session_type")
+		result := leprenom.CreateSession(sessionName, sessionType, db)
 		w.Header().Set("HX-Trigger", "newSessionCreatedEvent")
 		fmt.Fprintf(w, result)
 	}
 	listSessionHandler := func(w http.ResponseWriter, r *http.Request) {
 		var sessions []leprenom.Session
-		if err := db.Select("id", "name").Find(&sessions).Error; err != nil {
+		if err := db.Select("id", "name", "first_name_type").Find(&sessions).Error; err != nil {
 			log.Fatal(err)
 		}
-		sessionListPartialTmpl.Execute(w, sessions)
+		err = sessionListPartialTmpl.ExecuteTemplate(w, "session_list.html", sessions)
+		if err != nil {
+			fmt.Println("Session List Partial Template error: ", err)
+		}
 	}
 	http.HandleFunc("/", rootHandler)
 	http.HandleFunc("/stats", statsHandler)

@@ -44,11 +44,22 @@
           placeholder="Session Name"
           required
         />
+        <select name="session_type" id="session-type">
+          <option value="all">All</option>
+          <option value="boy">Boy</option>
+          <option value="girl">Girl</option>
+          <option value="unisex">Unisex</option>
+        </select>
+
         <button type="submit">Create</button>
       </form>
       <div id="new_session_result"></div>
       <h3>Available sessions</h3>
-      <ul hx-get="/sessions/list" hx-trigger="load, newSessionCreatedEvent from:body">
+      <div
+        hx-get="/sessions/list"
+        hx-trigger="load, newSessionCreatedEvent from:body"
+        class="container"
+      >
         <li>Placeholder</li>
       </ul>
     </div>

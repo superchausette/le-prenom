@@ -20,14 +20,6 @@ func NewServer(db *gorm.DB) *Server {
 }
 
 func (s *Server) RootHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	if r.URL.Path != "/" {
-		w.WriteHeader(http.StatusNotFound)
-		err := s.Template.ExecuteTemplate(w, "404.html", "")
-		if err != nil {
-			fmt.Println("Root Handler: unable to execute template", err)
-		}
-		return
-	}
 	err := s.Template.ExecuteTemplate(w, "index.html", "")
 	if err != nil {
 		fmt.Println("Root Handler: unable to execute template", err)
@@ -84,6 +76,7 @@ func (s *Server) NewSessionHandler(w http.ResponseWriter, r *http.Request, _ htt
 	w.Header().Set("HX-Trigger", "newSessionCreatedEvent")
 	fmt.Fprintf(w, result)
 }
+
 func (s *Server) ListSessionHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	var sessions []Session
 	if err := s.DB.Select("id", "name", "first_name_type").Find(&sessions).Error; err != nil {
@@ -94,10 +87,30 @@ func (s *Server) ListSessionHandler(w http.ResponseWriter, r *http.Request, _ ht
 		fmt.Println("Session List Partial Template error: ", err)
 	}
 }
+
+func (s *Server) SessionHandler(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	sessionId := params.ByName("id")
+	fmt.Println("My session: ", sessionId)
+	err := s.Template.ExecuteTemplate(w, "session.html", "")
+	if err != nil {
+		fmt.Println("SessionHandler Handler: unable to execute template", err)
+	}
+}
+
 func (s *Server) NotFoundHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 	err := s.Template.ExecuteTemplate(w, "404.html", "")
 	if err != nil {
 		fmt.Println("Root Handler: unable to execute template", err)
 	}
+}
+
+func (s *Server) SetupRoutes(router *httprouter.Router) {
+	router.GET("/", s.RootHandler)
+	router.GET("/stats", s.StatsHandler)
+	router.GET("/list", s.ListHandler)
+	router.POST("/sessions/new", s.NewSessionHandler)
+	router.GET("/sessions/list", s.ListSessionHandler)
+	router.GET("/session/:id", s.SessionHandler)
+	router.NotFound = http.HandlerFunc(s.NotFoundHandler)
 }

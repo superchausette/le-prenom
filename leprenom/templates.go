@@ -13,6 +13,7 @@ func NewTemplates() *template.Template {
 
 	files := []string{"template/index.html",
 		"template/list.html",
+		"template/session.html",
 		"template/404.html",
 		"template/partial/firstname_list.html",
 		"template/partial/footer.html",

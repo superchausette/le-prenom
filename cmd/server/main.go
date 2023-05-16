@@ -39,14 +39,8 @@ func main() {
 	db.AutoMigrate(&leprenom.SessionNameStatus{})
 
 	server := leprenom.NewServer(db)
-
 	router := httprouter.New()
-	router.GET("/", server.RootHandler)
-	router.GET("/stats", server.StatsHandler)
-	router.GET("/list", server.ListHandler)
-	router.POST("/sessions/new", server.NewSessionHandler)
-	router.GET("/sessions/list", server.ListSessionHandler)
-	router.NotFound = http.HandlerFunc(server.NotFoundHandler)
+	server.SetupRoutes(router)
 
 	// Start the web server
 	fmt.Println("Server is listening on http://localhost:9999/")

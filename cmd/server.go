@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/julienschmidt/httprouter"
 	"github.com/superchausette/le-prenom/leprenom"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -56,7 +57,7 @@ func main() {
 	templates := template.Must(template.New("templates").
 		Funcs(tmplFuncMap).
 		ParseFiles(templatesFiles...))
-	rootHandler := func(w http.ResponseWriter, r *http.Request) {
+	rootHandler := func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		if r.URL.Path != "/" {
 			w.WriteHeader(http.StatusNotFound)
 			err := templates.ExecuteTemplate(w, "404.html", "")
@@ -70,13 +71,13 @@ func main() {
 			fmt.Println("Root Handler: unable to execute template", err)
 		}
 	}
-	statsHandler := func(w http.ResponseWriter, r *http.Request) {
+	statsHandler := func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		err := templates.ExecuteTemplate(w, "stats.html", leprenom.NewFirstNameStats(db))
 		if err != nil {
 			fmt.Println("Stats Handler: unable to execute template", err)
 		}
 	}
-	listHandler := func(w http.ResponseWriter, r *http.Request) {
+	listHandler := func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		// Check if this an htmx request
 		htmx := r.Header.Get("HX-Request")
 		if htmx != "" {
@@ -108,7 +109,7 @@ func main() {
 			fmt.Println("List Handler: unable to execute template", err)
 		}
 	}
-	newSessionHandler := func(w http.ResponseWriter, r *http.Request) {
+	newSessionHandler := func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		err := r.ParseForm()
 		if err != nil {
 			log.Fatal(err)
@@ -119,7 +120,7 @@ func main() {
 		w.Header().Set("HX-Trigger", "newSessionCreatedEvent")
 		fmt.Fprintf(w, result)
 	}
-	listSessionHandler := func(w http.ResponseWriter, r *http.Request) {
+	listSessionHandler := func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		var sessions []leprenom.Session
 		if err := db.Select("id", "name", "first_name_type").Find(&sessions).Error; err != nil {
 			log.Fatal(err)
@@ -129,13 +130,23 @@ func main() {
 			fmt.Println("Session List Partial Template error: ", err)
 		}
 	}
-	http.HandleFunc("/", rootHandler)
-	http.HandleFunc("/stats", statsHandler)
-	http.HandleFunc("/list", listHandler)
-	http.HandleFunc("/sessions/new", newSessionHandler)
-	http.HandleFunc("/sessions/list", listSessionHandler)
+	notFoundHandler := func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+		err := templates.ExecuteTemplate(w, "404.html", "")
+		if err != nil {
+			fmt.Println("Root Handler: unable to execute template", err)
+		}
+	}
+
+	router := httprouter.New()
+	router.GET("/", rootHandler)
+	router.GET("/stats", statsHandler)
+	router.GET("/list", listHandler)
+	router.POST("/sessions/new", newSessionHandler)
+	router.GET("/sessions/list", listSessionHandler)
+	router.NotFound = http.HandlerFunc(notFoundHandler)
 
 	// Start the web server
 	fmt.Println("Server is listening on http://localhost:9999/")
-	log.Fatal(http.ListenAndServe(":9999", nil))
+	log.Fatal(http.ListenAndServe(":9999", router))
 }

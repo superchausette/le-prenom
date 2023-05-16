@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+  {{template "header"}}
+
+  <body>
+    <div class="container">
+      <h1>Welcome to le prenom !</h1>
+    </div>
+    <div class="container">
+      <h2>Stats</h2>
+      <div hx-get="/stats" hx-trigger="load" class="container">
+        Stat placeholder
+      </div>
+    </div>
+    {{template "footer"}}
+  </body>
+</html>

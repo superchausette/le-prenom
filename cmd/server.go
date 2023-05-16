@@ -38,47 +38,75 @@ func main() {
 	db.AutoMigrate(&leprenom.SessionContent{})
 	db.AutoMigrate(&leprenom.SessionNameStatus{})
 
-	//DataStatDisplay(db)
+	// Function used in templates
 	tmplFuncMap := template.FuncMap{
 		"mod": func(value, modulo int) int {
 			return value % modulo
 		},
 		"sessionTypeToStr": leprenom.SessionTypeToString}
-	indexTmpl := template.Must(template.ParseFiles("template/index.html"))
-	statsPartialTmpl := template.Must(template.ParseFiles("template/partial/stats.html"))
-	listTmpl := template.Must(template.ParseFiles("template/list.html"))
-	notFoundTmpl := template.Must(template.ParseFiles("template/404.html"))
-	sessionListPartialTmpl := template.Must(template.New("SessionList").
+	templatesFiles := []string{"template/index.html",
+		"template/list.html",
+		"template/404.html",
+		"template/partial/firstname_list.html",
+		"template/partial/footer.html",
+		"template/partial/header.html",
+		"template/partial/session_list.html",
+		"template/partial/stats.html",
+	}
+	templates := template.Must(template.New("templates").
 		Funcs(tmplFuncMap).
-		ParseFiles("template/partial/session_list.html"))
-	firstNameListPartialTmpl := template.Must(template.New("List").
-		Funcs(tmplFuncMap).
-		ParseFiles("template/partial/firstname_list.html"))
-
+		ParseFiles(templatesFiles...))
 	rootHandler := func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
 			w.WriteHeader(http.StatusNotFound)
-			notFoundTmpl.Execute(w, "")
+			err := templates.ExecuteTemplate(w, "404.html", "")
+			if err != nil {
+				fmt.Println("Root Handler: unable to execute template", err)
+			}
 			return
 		}
-		indexTmpl.Execute(w, "")
+		err := templates.ExecuteTemplate(w, "index.html", "")
+		if err != nil {
+			fmt.Println("Root Handler: unable to execute template", err)
+		}
 	}
 	statsHandler := func(w http.ResponseWriter, r *http.Request) {
-		statsPartialTmpl.Execute(w, leprenom.NewFirstNameStats(db))
+		err := templates.ExecuteTemplate(w, "stats.html", leprenom.NewFirstNameStats(db))
+		if err != nil {
+			fmt.Println("Stats Handler: unable to execute template", err)
+		}
 	}
 	listHandler := func(w http.ResponseWriter, r *http.Request) {
 		// Check if this an htmx request
 		htmx := r.Header.Get("HX-Request")
 		if htmx != "" {
+			var firstNames []string
 			listType := r.URL.Query().Get("type")
-			first_names := leprenom.ListAllFirstName(db)
-			err := firstNameListPartialTmpl.ExecuteTemplate(w, "firstname_list.html", first_names)
+			switch listType {
+			case "":
+				firstNames = leprenom.ListAllFirstName(db)
+			case "all":
+				firstNames = leprenom.ListAllFirstName(db)
+			case "boy":
+				firstNames = leprenom.ListAllBoyFirstName(db)
+			case "girl":
+				firstNames = leprenom.ListAllGirlFirstName(db)
+			case "unisex":
+				firstNames = leprenom.ListAllUnisexFirstName(db)
+			default:
+				fmt.Println("ListHandler: unexpected type:", listType)
+				return
+			}
+			err := templates.ExecuteTemplate(w, "firstname_list.html", firstNames)
 			if err != nil {
 				fmt.Println("First Name List Partial Template error: ", err)
 			}
 			return
 		}
-		err = listTmpl.Execute(w, "")
+		err = templates.ExecuteTemplate(w, "list.html", "")
+		if err != nil {
+			fmt.Println("List Handler: unable to execute template", err)
+		}
 	}
 	newSessionHandler := func(w http.ResponseWriter, r *http.Request) {
 		err := r.ParseForm()
@@ -96,7 +124,7 @@ func main() {
 		if err := db.Select("id", "name", "first_name_type").Find(&sessions).Error; err != nil {
 			log.Fatal(err)
 		}
-		err = sessionListPartialTmpl.ExecuteTemplate(w, "session_list.html", sessions)
+		err = templates.ExecuteTemplate(w, "session_list.html", sessions)
 		if err != nil {
 			fmt.Println("Session List Partial Template error: ", err)
 		}

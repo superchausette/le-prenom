@@ -19,14 +19,15 @@ type FirstName struct {
 }
 
 type Session struct {
-	ID            uint   `gorm:"primaryKey;autoIncrement"`
-	Name          string `gorm:"type:varchar(64);unique"`
-	FirstNameType uint   `gorm:"default:1"`
-	content       []SessionContent
+	ID              uint   `gorm:"primaryKey;autoIncrement"`
+	Name            string `gorm:"type:varchar(64);unique"`
+	FirstNameType   uint   `gorm:"default:1"`
+	SessionContents []SessionContent
 }
 
 type SessionContent struct {
 	ID          uint `gorm:"primaryKey;autoIncrement"`
+	SessionId   uint
 	FirstNameID uint
 	StatusID    uint
 }

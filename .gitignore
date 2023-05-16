@@ -19,3 +19,9 @@
 
 # Go workspace file
 go.work
+
+# Where the binary will be created
+bin
+
+coverage.txt
+*.db

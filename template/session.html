@@ -3,6 +3,40 @@
   {{template "header"}}
 
   <body>
+    <main role="main" class="container">
+      <h1><i>{{.Name}}</i> - {{.Type}} first name</h1>
+      <div name="stats">
+        <p>Total first names: {{.Total }}</p>
+        <p>
+          Remaining first names: {{.Remaining}} ({{percent .Remaining .Total |
+          printf "%.2f"}} %)
+        </p>
+      </div>
+      <div class="container">
+        <h1>Keep or Remove</h1>
+        <table class="table">
+          <tbody>
+            {{ $id := .ID }} {{range $idx := (seq 5)}}
+            <tr
+              id="session_choice_{{$idx}}"
+              hx-get="../session_choice/get?id={{$id}}&idx={{$idx}}"
+              hx-trigger="load"
+            ></tr>
+            {{end}}
+          </tbody>
+        </table>
+      </div>
+      <div class="container">
+        <h1>Short list</h1>
+        <table class="table">
+          <tbody
+            hx-get="../session_choice/list?sessionId={{$id}}"
+            hx-trigger="load, newFirstNameKept from:body"
+          ></tbody>
+        </table>
+      </div>
+    </main>
+
     {{template "footer"}}
   </body>
 </html>

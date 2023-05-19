@@ -1,0 +1,21 @@
+<td>{{.FirstName}}</td>
+<td>
+  <button
+    type="button"
+    class="btn btn-success"
+    hx-post="../session_choice/keep?nameId={{.FirstNameID}}&sessionId={{.SessionID}}&tableIdx={{.Index}}"
+    hx-target="#session_choice_{{.Index}}"
+  >
+    Keep
+  </button>
+</td>
+<td>
+  <button
+    type="button"
+    class="btn btn-danger"
+    hx-post="../session_choice/remove?nameId={{.FirstNameID}}&sessionId={{.SessionID}}&tableIdx={{.Index}}"
+    hx-target="#session_choice_{{.Index}}"
+  >
+    Remove
+  </button>
+</td>

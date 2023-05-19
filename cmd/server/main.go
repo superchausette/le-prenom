@@ -36,7 +36,6 @@ func main() {
 	db.AutoMigrate(&leprenom.FirstName{})
 	db.AutoMigrate(&leprenom.Session{})
 	db.AutoMigrate(&leprenom.SessionContent{})
-	db.AutoMigrate(&leprenom.SessionNameStatus{})
 
 	server := leprenom.NewServer(db)
 	router := httprouter.New()

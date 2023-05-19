@@ -1,5 +1,9 @@
 package leprenom
 
+import (
+	"time"
+)
+
 const (
 	BoyFirstName  int = 1
 	GirlFirstName     = 2
@@ -26,13 +30,9 @@ type Session struct {
 }
 
 type SessionContent struct {
-	ID          uint `gorm:"primaryKey;autoIncrement"`
-	SessionId   uint
-	FirstNameID uint
-	StatusID    uint
-}
-
-type SessionNameStatus struct {
-	ID     uint   `gorm:"primaryKey;autoIncrement"`
-	Status string `gorm:"type:varchar(32);unique"`
+	ID               uint `gorm:"primaryKey;autoIncrement"`
+	SessionID        uint `gorm:"uniqueIndex:idx_name_session"`
+	FirstNameID      uint `gorm:"uniqueIndex:idx_name_session"`
+	Keep             bool
+	LastModifiedTime time.Time `gorm:"autoUpdateTime:milli"`
 }

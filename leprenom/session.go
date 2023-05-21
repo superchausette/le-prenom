@@ -84,7 +84,7 @@ func RemainingFirstNameAvailableForSession(sessionId, sessionType uint, db *gorm
 	switch sessionType {
 	case AllSession:
 		err := db.Table("first_names").
-			Select("COUNT(DISTINCT first_names.name)"). //TODO issue with unisex names.
+			Select("COUNT(DISTINCT first_names.name)"). // TODO issue with unisex names.
 			Joins("LEFT JOIN session_contents ON first_names.id = session_contents.first_name_id",
 				" AND session_contents.session_id = ?", sessionId).
 			Where("session_contents.first_name_id IS NULL").

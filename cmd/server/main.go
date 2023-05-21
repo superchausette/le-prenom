@@ -14,6 +14,8 @@ import (
 )
 
 func main() {
+	host := flag.String("host", "", "host to bind to")
+	port := flag.Int("port", 9999, "port to listen on")
 	dbName := flag.String("dbname", "", "Database to create or update")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [OPTIONS]\n", os.Args[0])
@@ -42,6 +44,7 @@ func main() {
 	server.SetupRoutes(router)
 
 	// Start the web server
-	fmt.Println("Server is listening on http://localhost:9999/")
-	log.Fatal(http.ListenAndServe(":9999", router))
+	addr := fmt.Sprintf("%s:%d", *host, *port)
+	fmt.Println("Server is listening on ", addr)
+	log.Fatal(http.ListenAndServe(addr, router))
 }

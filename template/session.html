@@ -16,7 +16,7 @@
         <h1>Keep or Remove</h1>
         <table class="table">
           <tbody>
-            {{ $id := .ID }} {{range $idx := (seq 3)}}
+            {{ $id := .ID }} {{range $idx := (seq 5)}}
             <tr
               id="session_choice_{{$idx}}"
               hx-get="../session_choice/get?id={{$id}}&idx={{$idx}}"

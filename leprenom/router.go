@@ -247,6 +247,7 @@ func (s *Server) NotFoundHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) SetupRoutes(router *httprouter.Router) {
 	router.GET("/", s.RootHandler)
+	router.ServeFiles("/static/*filepath", http.Dir("static"))
 	router.GET("/stats", s.StatsHandler)
 	router.GET("/list", s.ListHandler)
 	router.POST("/sessions/new", s.NewSessionHandler)
